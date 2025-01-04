@@ -1,0 +1,144 @@
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+  }
+  
+  .container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #007bff;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  p {
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .text-gray-600 {
+    color: #6c757d;
+  }
+  
+  .text-gray-700 {
+    color: #495057;
+  }
+  
+  .text-gray-500 {
+    color: #868e96;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .text-blue-700 {
+    color: #007bff;
+  }
+  
+  .table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: #fff;
+  }
+  
+  .table th, .table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .table th {
+    background-color: #f1f1f1;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    color: #495057;
+  }
+  
+  .table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .page-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .page-buttons button {
+    padding: 8px 16px;
+    background-color: #e0e0e0;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .page-buttons button:disabled {
+    background-color: #c0c0c0;
+    cursor: not-allowed;
+  }
+  
+  .select-results {
+    display: flex;
+    align-items: center;
+  }
+  
+  .select-results select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 10px;
+  }
+  
+  section {
+    margin-bottom: 30px;
+  }
+  
+  table th, table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+  }
+  
+  section table {
+    margin-top: 20px;
+    width: 100%;
+  }
+  
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
