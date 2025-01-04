@@ -151,7 +151,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 - **National Vulnerability Database (NVD)** for providing the CVE data.
 - **React**, **Node.js**, **Express**, **MongoDB** for their great tools that helped build this project.
-
----
-
-This README file provides a comprehensive guide for your project setup, usage, and contribution. You can modify and extend it as per your needs!
