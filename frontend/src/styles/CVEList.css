@@ -1,0 +1,23 @@
+.results-per-page {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.results-per-page label {
+  margin-right: 10px;
+}
+
+.pagination-controls {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination-controls button {
+  font-size: 14px;
+  margin: 0 5px;
+}
+
+.pagination-controls span {
+  font-size: 14px;
+}

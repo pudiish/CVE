@@ -1,35 +1,40 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const cron = require('node-cron');
-const axios = require('axios');
-require('dotenv').config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const cron = require("node-cron");
+const axios = require("axios");
+require("dotenv").config();
 
 const app = express();
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
-
+// Middleware
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cve_database')
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/cve_database", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
+// Schema and Model
 const cveSchema = new mongoose.Schema({
-  id: String,
+  id: { type: String, unique: true },
   sourceIdentifier: String,
   published: Date,
   lastModified: Date,
   vulnStatus: String,
-  descriptions: [{
-    lang: String,
-    value: String
-  }],
+  descriptions: [{ lang: String, value: String }],
   metrics: {
     cvssMetricV2: {
       cvssData: {
@@ -43,95 +48,120 @@ const cveSchema = new mongoose.Schema({
         integrityImpact: String,
         availabilityImpact: String,
         exploitabilityScore: Number,
-        impactScore: Number
-      }
-    }
+        impactScore: Number,
+      },
+    },
   },
-  cpe: [{
-    criteria: String,
-    matchCriteriaId: String,
-    vulnerable: Boolean
-  }]
+  cpe: [{ criteria: String, matchCriteriaId: String, vulnerable: Boolean }],
 });
 
-const CVE = mongoose.model('CVE', cveSchema);
+const CVE = mongoose.model("CVE", cveSchema);
 
-async function fetchCVEs(startIndex = 0, resultsPerPage = 10) {
+// Fetch CVEs from NVD API
+async function fetchCVEs(startIndex = 0, resultsPerPage = 100) {
   try {
-    const response = await axios.get('https://services.nvd.nist.gov/rest/json/cves/2.0', {
-      params: {
-        startIndex,
-        resultsPerPage
+    const response = await axios.get(
+      "https://services.nvd.nist.gov/rest/json/cves/2.0",
+      {
+        params: { startIndex, resultsPerPage },
       }
-    });
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching CVEs:', error);
+    console.error("Error fetching CVEs:", error);
     return null;
   }
 }
 
+// Synchronize CVEs
 async function syncCVEs() {
-  console.log('Starting CVE sync...');
+  console.log("Starting CVE sync...");
   let startIndex = 0;
   const resultsPerPage = 100;
-  
+
   while (true) {
     const data = await fetchCVEs(startIndex, resultsPerPage);
-    if (!data || !data.vulnerabilities || data.vulnerabilities.length === 0) break;
-    
+    if (!data || !data.vulnerabilities || data.vulnerabilities.length === 0)
+      break;
+
     for (const vuln of data.vulnerabilities) {
+      if (!vuln.cve || !vuln.cve.id) continue; // Skip invalid entries
       await CVE.findOneAndUpdate(
         { id: vuln.cve.id },
-        vuln.cve,
+        { ...vuln.cve, lastModified: new Date(vuln.cve.lastModified) },
         { upsert: true, new: true }
       );
     }
-    
+
     startIndex += resultsPerPage;
     if (startIndex >= data.totalResults) break;
-    await new Promise(resolve => setTimeout(resolve, 6000));
+    await new Promise((resolve) => setTimeout(resolve, 6000));
   }
-  console.log('CVE sync completed');
+  console.log("CVE sync completed");
 }
 
-cron.schedule('0 0 * * *', syncCVEs);
+// Schedule Sync
+cron.schedule("0 0 * * *", syncCVEs); // Daily at midnight
 
-app.get('/api/cves', async (req, res) => {
+// API Routes
+app.get("/api/cves", async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, id, year, score, modifiedDays } = req.query;
     const skip = (page - 1) * limit;
-    
-    const cves = await CVE.find()
-      .sort({ lastModified: -1 })
+    const filter = {};
+
+    if (id) filter.id = id;
+    if (year) {
+      filter.published = {
+        $gte: new Date(`${year}-01-01`),
+        $lte: new Date(`${year}-12-31`),
+      };
+    }
+    if (score) {
+      filter["metrics.cvssMetricV2.cvssData.baseScore"] = {
+        $gte: parseFloat(score),
+      };
+    }
+    if (modifiedDays) {
+      const sinceDate = new Date();
+      sinceDate.setDate(sinceDate.getDate() - modifiedDays);
+      filter.lastModified = { $gte: sinceDate };
+    }
+
+    const total = await CVE.countDocuments(filter);
+    const cves = await CVE.find(filter)
+      .sort({ id: 1, lastModified: -1 }) // Sort by id and date
       .skip(skip)
       .limit(parseInt(limit));
-      
-    const total = await CVE.countDocuments();
-    
+
     res.json({
       cves,
       total,
       totalPages: Math.ceil(total / limit),
-      currentPage: parseInt(page)
+      currentPage: parseInt(page),
+      hasNextPage: skip + parseInt(limit) < total,
+      hasPrevPage: page > 1,
     });
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching CVEs:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.get('/api/cves/:id', async (req, res) => {
+app.get("/api/cves/:id", async (req, res) => {
   try {
     const cve = await CVE.findOne({ id: req.params.id });
     if (!cve) {
-      return res.status(404).json({ error: 'CVE not found' });
+      return res.status(404).json({ error: "CVE not found" });
     }
     res.json(cve);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching CVE detail:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
+// Start Server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
