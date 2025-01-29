@@ -93,44 +93,60 @@ async function syncCVEs() {
       );
     }
 
-    startIndex += resultsPerPage;
+    startIndex += resultsPerPage; // Move to the next batch of 100
     if (startIndex >= data.totalResults) break;
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+
+    await new Promise((resolve) => setTimeout(resolve, 6000)); // Wait 6 sec to prevent rate limit
   }
   console.log("CVE sync completed");
 }
+
 
 // Schedule Sync
 cron.schedule("0 0 * * *", syncCVEs); // Daily at midnight
 
 // API Routes
+
+// GET /api/cves - Fetch CVEs with filtering
 app.get("/api/cves", async (req, res) => {
   try {
     const { page = 1, limit = 10, id, year, score, modifiedDays } = req.query;
     const skip = (page - 1) * limit;
     const filter = {};
 
-    if (id) filter.id = id;
+    // Filter by CVE ID (Exact Match)
+    if (id) {
+      filter.id = id;
+    }
+
+    // Filter by Year (Published Date)
     if (year) {
       filter.published = {
-        $gte: new Date(`${year}-01-01`),
-        $lte: new Date(`${year}-12-31`),
+        $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+        $lte: new Date(`${year}-12-31T23:59:59.999Z`),
       };
     }
+
+    // Filter by CVSS Score (Greater than or equal to given score)
     if (score) {
       filter["metrics.cvssMetricV2.cvssData.baseScore"] = {
         $gte: parseFloat(score),
       };
     }
+
+    // Filter by last modified days
     if (modifiedDays) {
       const sinceDate = new Date();
       sinceDate.setDate(sinceDate.getDate() - modifiedDays);
       filter.lastModified = { $gte: sinceDate };
     }
 
+    // Fetching total filtered results count
     const total = await CVE.countDocuments(filter);
+
+    // Fetching paginated results
     const cves = await CVE.find(filter)
-      .sort({ id: 1, lastModified: -1 }) // Sort by id and date
+      .sort({ lastModified: -1 }) // Sort by latest modified first
       .skip(skip)
       .limit(parseInt(limit));
 
@@ -148,6 +164,7 @@ app.get("/api/cves", async (req, res) => {
   }
 });
 
+// GET /api/cves/:id - Fetch specific CVE details
 app.get("/api/cves/:id", async (req, res) => {
   try {
     const cve = await CVE.findOne({ id: req.params.id });
