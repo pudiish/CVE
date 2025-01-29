@@ -6,7 +6,7 @@
 
 h1 {
   font-size: 24px;
-  margin-bottom: 20px;
+  margin: 0;
 }
 
 h2 {
@@ -40,3 +40,28 @@ th {
   text-align: center;
 }
 
+/* Flex container for header and back button */
+.header-container {
+  display: flex;
+  justify-content: space-between; /* Align h1 left and button right */
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+
+/* Updated Back Button Styling */
+.backBtn {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.backBtn:hover {
+  background-color: #0056b3;
+}
