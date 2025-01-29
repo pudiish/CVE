@@ -19,8 +19,11 @@ A full-stack web application that fetches, stores, and displays Common Vulnerabi
 - CSS 
 
 - ![CVE Dashboard](https://drive.google.com/uc?export=view&id=1f8Yv8_OzAy5QHDbbE8kwzn4K3EBXVefR)
+- **CVE Dashboard**
 - ![CVE List](https://drive.google.com/uc?export=view&id=186Hc1pwYz-Lo0XcZaoCgrUbKMmDTbPM7)
+- **CVE List**
 - ![CVE Details with Back Button Navigation](https://drive.google.com/uc?export=view&id=1W74_p6c_SpCCL6lU-JzMItw5FMTsvzQi)
+- **CVE Details with Back Button Navigation**
 ### Backend
 - Node.js & Express
 - MongoDB
