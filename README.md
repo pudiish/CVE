@@ -99,13 +99,6 @@ The application uses cron jobs to sync with the NVD API daily at midnight. Data 
 cron.schedule("0 0 * * *", syncCVEs);
 ```
 
-## Roadmap
-
-- [ ] Advanced search functionality
-- [ ] Enhanced filtering options
-- [ ] User authentication
-- [ ] Improved data visualization
-- [ ] Custom dashboard views
 
 ## Author
 
