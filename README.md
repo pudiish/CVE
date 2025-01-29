@@ -1,153 +1,111 @@
-# CVE Dashboard
+# CVE Dashboard 🛡️
 
-Name: Swarnapudi Ishwar
-
-This project is a full-stack web application that allows users to view and explore Common Vulnerabilities and Exposures (CVE) data. It fetches data from the National Vulnerability Database (NVD) API, processes it, and presents it in a user-friendly format. This application features a paginated list of CVEs, detailed views for each CVE, and periodic syncing with the NVD API to ensure the data is up to date.
-
-## Tech Stack
-
-- **Frontend**: React, React Router, Axios, CSS, Bootstrap
-- **Backend**: Node.js, Express, MongoDB, Cron Jobs
-- **External API**: National Vulnerability Database (NVD) API
-- **Database**: MongoDB (for storing CVE data locally)
-- **Cron Jobs**: For syncing CVE data daily
-- **Deployment**: Can be deployed to any cloud platform (AWS, Heroku, etc.)
+A full-stack web application that fetches, stores, and displays Common Vulnerabilities and Exposures (CVE) data from the National Vulnerability Database (NVD) API. Built with React, Node.js, and MongoDB, this dashboard provides real-time access to security vulnerability information with daily automated updates.
 
 ## Features
 
-- **Paginated CVE List**:
-  - Displays a paginated list of CVEs, showing CVE ID, description, published date, and other relevant details.
-  - Pagination controls allow users to browse through multiple pages of CVE entries.
+- **Real-time CVE Data**: Synchronized daily with the NVD database
+- **Fast Performance**: Local MongoDB storage for quick data access
+- **Detailed Information**: CVSS scores, exploitability metrics, and impact analysis
+- **Paginated Views**: Efficient browsing of CVE records
+- **Comprehensive Search**: Filter by CVE ID, year, severity, and more
 
-- **Detailed CVE View**:
-  - Clicking on a CVE displays detailed information, including:
-    - CVE description and impact.
-    - CVSS (Common Vulnerability Scoring System) score and vector string.
-    - Exploitability and Impact Scores.
-    - A list of vulnerable products (CPEs).
+## Tech Stack
 
-- **Syncing Data**:
-  - The backend uses a cron job to fetch and update the CVE data every day from the NVD API.
-  - The data is stored locally in MongoDB to improve performance and reduce load times.
+### Frontend
+- React
+- React Router
+- Axios
+- CSS 
 
-- **Search Functionality**:
-  - Search for CVEs by ID, description, or other criteria (coming soon).
-  
-- **Responsive Design**:
-  - The frontend is fully responsive and works seamlessly across desktop and mobile devices.
+- ![CVE Dashboard](https://drive.google.com/uc?export=view&id=1f8Yv8_OzAy5QHDbbE8kwzn4K3EBXVefR)
+- ![CVE List](https://drive.google.com/file/d/186Hc1pwYz-Lo0XcZaoCgrUbKMmDTbPM7/view?usp=sharing)
+- ![CVE Details with Back Button Navigation](https://drive.google.com/file/d/1W74_p6c_SpCCL6lU-JzMItw5FMTsvzQi/view?usp=sharing)
+### Backend
+- Node.js & Express
+- MongoDB
+- Mongoose
+- Node-cron for automated syncs
 
 ## Getting Started
 
 ### Prerequisites
-
-To run this application locally, you need to have the following installed:
-
-1. **Node.js**: To run the backend.
-2. **MongoDB**: To store CVE data. You can use a local MongoDB instance or a cloud-based service like MongoDB Atlas.
-3. **npm (Node Package Manager)**: For managing frontend dependencies.
+- Node.js
+- MongoDB (local or MongoDB Atlas)
+- npm
 
 ### Installation
 
-#### Backend Setup
-
-1. Clone the repository:
+1. **Clone the Repository**
    ```bash
    git clone https://github.com/pudiish/CVE.git
    cd CVE
    ```
 
-2. Install the backend dependencies:
+2. **Backend Setup**
    ```bash
    npm install
    ```
-
-3. Set up environment variables:
-   - Create a `.env` file in the root directory of the project and add your MongoDB URI:
-     ```
-     MONGODB_URI=your_mongodb_connection_string
-     ```
-
-4. Run the backend server:
+   
+   Create a `.env` file:
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   ```
+   
+   Start the server:
    ```bash
    npm start
    ```
-   This will start the server on `http://localhost:5001`.
+   The backend will run on http://localhost:5001
 
-#### Frontend Setup
-
-1. Navigate to the frontend folder and install dependencies:
+3. **Frontend Setup**
    ```bash
    cd frontend
    npm install
-   ```
-
-2. Start the React development server:
-   ```bash
    npm start
    ```
-   This will start the frontend on `http://localhost:3000`.
+   The frontend will run on http://localhost:3000
 
-#### Running the Full Stack Application
+## API Documentation
 
-1. Make sure both the backend and frontend servers are running:
-   - Backend: `http://localhost:5001`
-   - Frontend: `http://localhost:3000`
-
-2. Open your browser and visit `http://localhost:3000` to access the CVE Dashboard.
-
-## API Endpoints
-
-### `/api/cves`
-
-- **Method**: `GET`
-- **Description**: Fetches a paginated list of CVEs.
-- **Query Parameters**:
-  - `page`: Page number (default is `1`).
-  - `limit`: Number of CVEs per page (default is `10`).
-
-**Example Request**:
+### Get Paginated CVE List
 ```bash
-GET http://localhost:5001/api/cves?page=1&limit=10
+GET /api/cves?page=1&limit=10
+```
+Query Parameters:
+- `page`: Page number (default: 1)
+- `limit`: Results per page (default: 10)
+- `id`: Search by CVE ID
+- `year`: Filter by publication year
+- `score`: Filter by minimum CVSS score
+- `modifiedDays`: Get CVEs modified in last X days
+
+### Get CVE Details
+```bash
+GET /api/cves/:id
 ```
 
-### `/api/cves/:id`
+## Automated Updates
 
-- **Method**: `GET`
-- **Description**: Fetches detailed information for a specific CVE by its ID.
-  
-**Example Request**:
-```bash
-GET http://localhost:5001/api/cves/CVE-2021-34527
+The application uses cron jobs to sync with the NVD API daily at midnight. Data is fetched in batches of 100 to respect API rate limits and efficiently stored in MongoDB using upsert operations.
+
+```javascript
+cron.schedule("0 0 * * *", syncCVEs);
 ```
 
-## Cron Jobs
+## Roadmap
 
-The backend is set up with a cron job that runs every day at midnight to sync the CVE data from the NVD API. This ensures that the local database is updated with the latest CVE information daily.
+- [ ] Advanced search functionality
+- [ ] Enhanced filtering options
+- [ ] User authentication
+- [ ] Improved data visualization
+- [ ] Custom dashboard views
 
-- **Cron Job**: Runs every day at `0 0 * * *` (midnight).
-  
-## Future Enhancements
+## Author
 
-- **Search**: Implement a search feature to allow users to search for CVEs by various criteria (e.g., severity, date range).
-- **Filters**: Add filters to refine CVE searches based on severity, publication date, and other parameters.
-- **User Authentication**: Implement user authentication for saving search history or favorite CVEs.
-- **UI/UX Improvements**: Refine the user interface with better styling, responsiveness, and additional features like tooltips for CVSS scores.
-
-## Contributing
-
-We welcome contributions! If you'd like to improve the project, follow these steps:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Make your changes and commit (`git commit -am 'Add new feature'`).
-4. Push to your branch (`git push origin feature-name`).
-5. Open a pull request to merge your changes.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Swarnapudi Ishwar
 
 ## Acknowledgments
 
-- **National Vulnerability Database (NVD)** for providing the CVE data.
-- **React**, **Node.js**, **Express**, **MongoDB** for their great tools that helped build this project.
+- National Vulnerability Database (NVD) for providing the CVE data
+- The open-source community for the amazing tools and libraries
